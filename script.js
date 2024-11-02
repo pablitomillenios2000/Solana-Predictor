@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
             #overlay-container {
                 position: absolute;
                 top: 20px;
-                right: 20px;
+                left: 20px; /* Position the container on the left */
                 width: 300px;
                 background-color: rgba(255, 255, 255, 0.9);
                 padding: 15px;
