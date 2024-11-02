@@ -1,0 +1,49 @@
+/* Reset default margins and paddings */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+}
+
+#chart {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+#overlay-container {
+    position: absolute;
+    top: 20px;
+    left: 100px;
+    width: 300px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10; /* Ensure container is above the chart */
+}
+
+#overlay-container h3 {
+    margin-top: 0;
+    font-size: 16px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 4px;
+    text-align: left;
+}
+
+button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px;
+}

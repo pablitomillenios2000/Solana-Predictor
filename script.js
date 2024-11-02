@@ -1,79 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const initialPrice = 166;
-    const secondPrice = 170;
     const targetDate = new Date('2025-10-01');
-
-    // Create UI for data entry
-    const container = document.createElement('div');
-    container.innerHTML = `
-        <style>
-            /* Style for full-screen graph and overlay container */
-            body, html {
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                height: 100%;
-            }
-            #chart {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-            }
-            #overlay-container {
-                position: absolute;
-                top: 20px;
-                left: 20px; /* Position the container on the left */
-                width: 300px;
-                background-color: rgba(255, 255, 255, 0.9);
-                padding: 15px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                z-index: 10; /* Ensure container is above the chart */
-            }
-            #overlay-container h3 {
-                margin-top: 0;
-                font-size: 16px;
-                text-align: center;
-            }
-            table {
-                width: 100%;
-                margin-top: 10px;
-            }
-            th, td {
-                padding: 4px;
-                text-align: left;
-            }
-            button {
-                margin-top: 10px;
-                width: 100%;
-                padding: 8px;
-            }
-        </style>
-        <div id="overlay-container">
-            <h3>Enter Date-Price Pairs</h3>
-            <table id="dataTable">
-                <tr>
-                    <th>Date (YYYY-MM-DD)</th>
-                    <th>Price ($)</th>
-                </tr>
-                <tr>
-                    <td><input type="date" value="2024-11-01" class="date-input"></td>
-                    <td><input type="number" value="${initialPrice}" class="price-input"></td>
-                </tr>
-                <tr>
-                    <td><input type="date" value="2024-11-02" class="date-input"></td>
-                    <td><input type="number" value="${secondPrice}" class="price-input"></td>
-                </tr>
-            </table>
-            <button id="addRow">Add Row</button>
-            <button id="projectPrice">Project Price</button>
-            <div id="output"></div>
-        </div>
-        <div id="chart"></div>
-    `;
-    document.body.appendChild(container);
 
     // Add event listener to add rows
     document.getElementById('addRow').addEventListener('click', function () {
@@ -127,7 +53,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return [];
         }
 
-        // Convert date and price data, taking natural log of price
         const datePrices = dataPairs.map(pair => ({
             date: new Date(pair.date).getTime(),
             price: Math.log(pair.price)
@@ -150,7 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const slope = (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
 
-        // Generate daily dates and projected prices for a smooth curve
         const startDate = new Date(datePrices[0].date);
         const interval = 24 * 60 * 60 * 1000; // 1-day interval
         const projectedData = [];
@@ -159,11 +83,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const logProjectedPrice = intercept + slope * t;
             projectedData.push({
                 date: new Date(t),
-                price: Math.exp(logProjectedPrice) // Convert log price back to original scale
+                price: Math.exp(logProjectedPrice)
             });
         }
 
-        // Add final target date projection
         const finalLogPrice = intercept + slope * targetDate.getTime();
         projectedData.push({
             date: targetDate,
