@@ -1,30 +1,77 @@
 document.addEventListener("DOMContentLoaded", function () {
     const initialPrice = 166;
-    const secondPrice = 167.2;
+    const secondPrice = 170;
     const targetDate = new Date('2025-10-01');
 
     // Create UI for data entry
     const container = document.createElement('div');
     container.innerHTML = `
-        <h3>Enter Date-Price Pairs</h3>
-        <table id="dataTable">
-            <tr>
-                <th>Date (YYYY-MM-DD)</th>
-                <th>Price ($)</th>
-            </tr>
-            <tr>
-                <td><input type="date" value="2024-11-01" class="date-input"></td>
-                <td><input type="number" value="${initialPrice}" class="price-input"></td>
-            </tr>
-            <tr>
-                <td><input type="date" value="2024-11-02" class="date-input"></td>
-                <td><input type="number" value="${secondPrice}" class="price-input"></td>
-            </tr>
-        </table>
-        <button id="addRow">Add Row</button>
-        <button id="projectPrice">Project Price</button>
-        <div id="output"></div>
-        <div id="chart" style="width:100%;height:600px;"></div>
+        <style>
+            /* Style for full-screen graph and overlay container */
+            body, html {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                height: 100%;
+            }
+            #chart {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+            }
+            #overlay-container {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                width: 300px;
+                background-color: rgba(255, 255, 255, 0.9);
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 10; /* Ensure container is above the chart */
+            }
+            #overlay-container h3 {
+                margin-top: 0;
+                font-size: 16px;
+                text-align: center;
+            }
+            table {
+                width: 100%;
+                margin-top: 10px;
+            }
+            th, td {
+                padding: 4px;
+                text-align: left;
+            }
+            button {
+                margin-top: 10px;
+                width: 100%;
+                padding: 8px;
+            }
+        </style>
+        <div id="overlay-container">
+            <h3>Enter Date-Price Pairs</h3>
+            <table id="dataTable">
+                <tr>
+                    <th>Date (YYYY-MM-DD)</th>
+                    <th>Price ($)</th>
+                </tr>
+                <tr>
+                    <td><input type="date" value="2024-11-01" class="date-input"></td>
+                    <td><input type="number" value="${initialPrice}" class="price-input"></td>
+                </tr>
+                <tr>
+                    <td><input type="date" value="2024-11-02" class="date-input"></td>
+                    <td><input type="number" value="${secondPrice}" class="price-input"></td>
+                </tr>
+            </table>
+            <button id="addRow">Add Row</button>
+            <button id="projectPrice">Project Price</button>
+            <div id="output"></div>
+        </div>
+        <div id="chart"></div>
     `;
     document.body.appendChild(container);
 
@@ -137,15 +184,15 @@ document.addEventListener("DOMContentLoaded", function () {
             mode: 'lines+markers',
             type: 'scatter',
             name: 'SOL Price Projection',
-            hovertemplate: 'Date: %{x}<br>Price: $%{y:.2f}<extra></extra>' // Custom hover format
+            hovertemplate: 'Date: %{x}<br>Price: $%{y:.2f}<extra></extra>'
         };
 
         const layout = {
             title: 'SOL Price Projection with Daily Points',
             xaxis: {
                 title: 'Date',
-                tickformat: '%Y-%m-%d', // Format to show year-month-day
-                dtick: 'M1', // Show one tick per month for better readability
+                tickformat: '%Y-%m-%d',
+                dtick: 'M1',
             },
             yaxis: { title: 'Price ($)' }
         };
