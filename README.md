@@ -1,5 +1,6 @@
 # PURPOSE
 
+This script should extrapolate if SOL is on-track to reach a high value by the end of the bull run or if it is below-target and we should invest in something else
 
 # INSTALLATION
 
