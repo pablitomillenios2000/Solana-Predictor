@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const initialPrice = 166;
-    const secondPrice = 170;
+    const secondPrice = 167.2;
     const targetDate = new Date('2025-10-01');
 
     // Create UI for data entry
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Function to calculate exponential projection with intermediate points
+    // Function to calculate exponential projection with daily points
     function calculateExponentialProjection(dataPairs, targetDate) {
         if (dataPairs.length < 2) {
             console.log("Please provide at least two data points for accurate projection.");
@@ -103,9 +103,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const slope = (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
 
-        // Generate intermediate dates and projected prices for smooth parabolic curve
+        // Generate daily dates and projected prices for a smooth curve
         const startDate = new Date(datePrices[0].date);
-        const interval = 30 * 24 * 60 * 60 * 1000; // 30-day interval
+        const interval = 24 * 60 * 60 * 1000; // 1-day interval
         const projectedData = [];
 
         for (let t = startDate.getTime(); t <= targetDate.getTime(); t += interval) {
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return projectedData;
     }
 
-    // Function to plot the projection using Plotly
+    // Function to plot the projection using Plotly with daily points
     function plotProjection(projectionData) {
         const dates = projectionData.map(point => point.date);
         const prices = projectionData.map(point => point.price);
@@ -136,12 +136,17 @@ document.addEventListener("DOMContentLoaded", function () {
             y: prices,
             mode: 'lines+markers',
             type: 'scatter',
-            name: 'SOL Price Projection'
+            name: 'SOL Price Projection',
+            hovertemplate: 'Date: %{x}<br>Price: $%{y:.2f}<extra></extra>' // Custom hover format
         };
 
         const layout = {
-            title: 'SOL Price Projection with Exponential Growth',
-            xaxis: { title: 'Date' },
+            title: 'SOL Price Projection with Daily Points',
+            xaxis: {
+                title: 'Date',
+                tickformat: '%Y-%m-%d', // Format to show year-month-day
+                dtick: 'M1', // Show one tick per month for better readability
+            },
             yaxis: { title: 'Price ($)' }
         };
 
