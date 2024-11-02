@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const initialPrice = 166;
+    const secondPrice = 170;
     const targetDate = new Date('2025-10-01');
 
     // Create UI for data entry
@@ -14,6 +15,10 @@ document.addEventListener("DOMContentLoaded", function () {
             <tr>
                 <td><input type="date" value="2024-11-01" class="date-input"></td>
                 <td><input type="number" value="${initialPrice}" class="price-input"></td>
+            </tr>
+            <tr>
+                <td><input type="date" value="2024-11-02" class="date-input"></td>
+                <td><input type="number" value="${secondPrice}" class="price-input"></td>
             </tr>
         </table>
         <button id="addRow">Add Row</button>
@@ -34,8 +39,14 @@ document.addEventListener("DOMContentLoaded", function () {
         priceCell.innerHTML = `<input type="number" class="price-input">`;
     });
 
-    // Add event listener to project price
-    document.getElementById('projectPrice').addEventListener('click', function () {
+    // Add event listener to manually project price if data changes
+    document.getElementById('projectPrice').addEventListener('click', runProjection);
+
+    // Automatically run initial projection on page load
+    runProjection();
+
+    // Function to run projection and update the chart
+    function runProjection() {
         const dataPairs = [];
         const dateInputs = document.querySelectorAll('.date-input');
         const priceInputs = document.querySelectorAll('.price-input');
@@ -50,27 +61,29 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Calculate the projection
-        const projectedPrice = calculateProjection(dataPairs, targetDate);
+        const projectionData = calculateExponentialProjection(dataPairs, targetDate);
         const output = document.getElementById('output');
 
-        if (projectedPrice !== null && !isNaN(projectedPrice)) {
-            output.innerHTML = `Projected SOL Price for ${targetDate.toDateString()}: $${projectedPrice.toFixed(2)}`;
-            plotProjection(dataPairs, targetDate, projectedPrice);
+        if (projectionData && projectionData.length > 0) {
+            const finalProjectedPrice = projectionData[projectionData.length - 1].price;
+            output.innerHTML = `Projected SOL Price for ${targetDate.toDateString()}: $${finalProjectedPrice.toFixed(2)}`;
+            plotProjection(projectionData);
         } else {
             output.innerHTML = "Projection could not be calculated. Please check the data pairs.";
         }
-    });
+    }
 
-    // Function to calculate the projected price
-    function calculateProjection(dataPairs, targetDate) {
+    // Function to calculate exponential projection with intermediate points
+    function calculateExponentialProjection(dataPairs, targetDate) {
         if (dataPairs.length < 2) {
             console.log("Please provide at least two data points for accurate projection.");
-            return null;
+            return [];
         }
 
+        // Convert date and price data, taking natural log of price
         const datePrices = dataPairs.map(pair => ({
             date: new Date(pair.date).getTime(),
-            price: pair.price
+            price: Math.log(pair.price)
         }));
 
         datePrices.sort((a, b) => a.date - b.date);
@@ -84,23 +97,39 @@ document.addEventListener("DOMContentLoaded", function () {
         const denominator = n * sumX2 - sumX * sumX;
         if (denominator === 0) {
             console.log("Error in calculation: denominator is zero.");
-            return null;
+            return [];
         }
 
         const slope = (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
 
-        const targetTimestamp = targetDate.getTime();
-        return slope * targetTimestamp + intercept;
+        // Generate intermediate dates and projected prices for smooth parabolic curve
+        const startDate = new Date(datePrices[0].date);
+        const interval = 30 * 24 * 60 * 60 * 1000; // 30-day interval
+        const projectedData = [];
+
+        for (let t = startDate.getTime(); t <= targetDate.getTime(); t += interval) {
+            const logProjectedPrice = intercept + slope * t;
+            projectedData.push({
+                date: new Date(t),
+                price: Math.exp(logProjectedPrice) // Convert log price back to original scale
+            });
+        }
+
+        // Add final target date projection
+        const finalLogPrice = intercept + slope * targetDate.getTime();
+        projectedData.push({
+            date: targetDate,
+            price: Math.exp(finalLogPrice)
+        });
+
+        return projectedData;
     }
 
     // Function to plot the projection using Plotly
-    function plotProjection(dataPairs, targetDate, projectedPrice) {
-        const dates = dataPairs.map(pair => new Date(pair.date));
-        const prices = dataPairs.map(pair => pair.price);
-
-        dates.push(targetDate);
-        prices.push(projectedPrice);
+    function plotProjection(projectionData) {
+        const dates = projectionData.map(point => point.date);
+        const prices = projectionData.map(point => point.price);
 
         const trace = {
             x: dates,
@@ -111,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         const layout = {
-            title: 'SOL Price Projection',
+            title: 'SOL Price Projection with Exponential Growth',
             xaxis: { title: 'Date' },
             yaxis: { title: 'Price ($)' }
         };
